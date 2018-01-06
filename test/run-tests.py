@@ -146,14 +146,16 @@ TOOLS = {
         'FLAGS': [
                 '--bindir=%(bindir)s',
                 '--no-error-cmdline',
-                # TODO(binji): Add Windows compile support
-                '--no-compile' if IS_WINDOWS else '--compile',
                 '-o',
                 '%(out_dir)s',
         ],
         'VERBOSE-FLAGS': ['--print-cmd', '-v']
     }
 }
+
+# TODO(binji): Add Windows support for compiling using run-spec-wasm2c.py
+if IS_WINDOWS:
+  TOOLS['run-spec-wasm2c']['SKIP'] = ''
 
 ROUNDTRIP_TOOLS = ('wat2wasm',)
 
