@@ -376,7 +376,7 @@ def main(args):
     if options.compile:
       main_c = os.path.basename(main_filename)
       main_exe = os.path.basename(utils.ChangeExt(json_file_path, ''))
-      cc.RunWithArgs('-o', main_exe, '-lm', main_c, *o_filenames, cwd=out_dir)
+      cc.RunWithArgs('-o', main_exe, main_c, *o_filenames, '-lm', cwd=out_dir)
 
     if options.compile and options.run:
       utils.Executable(os.path.join(out_dir, main_exe),
