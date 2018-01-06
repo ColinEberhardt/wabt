@@ -1207,33 +1207,6 @@ void WatWriter::WriteImport(const Import& import) {
   }
 }
 
-void WatWriter::WriteInlineImport(const Import& import) {
-  switch (import.kind()) {
-    case ExternalKind::Func:
-      WriteBeginFunc(cast<FuncImport>(&import)->func);
-      WriteCloseSpace();
-      break;
-
-    case ExternalKind::Table:
-      WriteTable(cast<TableImport>(&import)->table);
-      break;
-
-    case ExternalKind::Memory:
-      WriteMemory(cast<MemoryImport>(&import)->memory);
-      break;
-
-    case ExternalKind::Global:
-      WriteBeginGlobal(cast<GlobalImport>(&import)->global);
-      WriteCloseSpace();
-      break;
-
-    case ExternalKind::Except:
-      WriteBeginException(cast<ExceptionImport>(&import)->except);
-      WriteCloseSpace();
-      break;
-  }
-}
-
 void WatWriter::WriteExport(const Export& export_) {
   if (options_->inline_export && IsInlineExport(export_)) {
     return;
