@@ -181,11 +181,6 @@ static bool is_arithmetic_nan_f64(u64 x) {
   return (x & 0x7ff8000000000000) == 0x7ff8000000000000;
 }
 
-void wasm_rt_trap(wasm_rt_trap_t code) {
-  assert(code != WASM_RT_TRAP_NONE);
-  longjmp(g_jmp_buf, code);
-}
-
 static bool func_types_are_equal(FuncType* a, FuncType* b) {
   if (a->param_count != b->param_count || a->result_count != b->result_count)
     return 0;
@@ -197,6 +192,18 @@ static bool func_types_are_equal(FuncType* a, FuncType* b) {
     if (a->results[i] != b->results[i])
       return 0;
   return 1;
+}
+
+
+/*
+ * wasm_rt_* implementations
+ */
+
+uint32_t wasm_rt_call_stack_depth;
+
+void wasm_rt_trap(wasm_rt_trap_t code) {
+  assert(code != WASM_RT_TRAP_NONE);
+  longjmp(g_jmp_buf, code);
 }
 
 u32 wasm_rt_register_func_type(u32 param_count, u32 result_count, ...) {
@@ -259,40 +266,53 @@ void wasm_rt_allocate_table(wasm_rt_table_t* table,
   table->data = calloc(table->size, sizeof(wasm_rt_elem_t));
 }
 
-uint32_t wasm_rt_call_stack_depth;
 
-wasm_rt_table_t Z_spectestZ_table;
-wasm_rt_memory_t Z_spectestZ_memory;
-uint32_t Z_spectestZ_globalZ_i = 666;
-
-void Z_spectestZ_printZ_vv(void) {
+/*
+ * spectest implementations
+ */
+static void spectest_print_vv(void) {
   printf("spectest.print()\n");
 }
 
-void Z_spectestZ_printZ_vi(uint32_t i) {
+static void spectest_print_vi(uint32_t i) {
   printf("spectest.print(%d)\n", i);
 }
 
-void Z_spectestZ_printZ_vf(float f) {
+static void spectest_print_vf(float f) {
   printf("spectest.print(%g)\n", f);
 }
 
-void Z_spectestZ_printZ_vif(uint32_t i, float f) {
+static void spectest_print_vif(uint32_t i, float f) {
   printf("spectest.print(%d %g)\n", i, f);
 }
 
-void Z_spectestZ_printZ_vd(double d) {
+static void spectest_print_vd(double d) {
   printf("spectest.print(%g)\n", d);
 }
 
-void Z_spectestZ_printZ_vdd(double d1, double d2) {
+static void spectest_print_vdd(double d1, double d2) {
   printf("spectest.print(%g %g)\n", d1, d2);
 }
 
+static wasm_rt_table_t spectest_table;
+static wasm_rt_memory_t spectest_memory;
+static uint32_t spectest_global = 666;
+
+void (*Z_spectestZ_printZ_vv)(void) = &spectest_print_vv;
+void (*Z_spectestZ_printZ_vi)(uint32_t) = &spectest_print_vi;
+void (*Z_spectestZ_printZ_vf)(float) = &spectest_print_vf;
+void (*Z_spectestZ_printZ_vif)(uint32_t, float) = &spectest_print_vif;
+void (*Z_spectestZ_printZ_vd)(double) = &spectest_print_vd;
+void (*Z_spectestZ_printZ_vdd)(double, double) = &spectest_print_vdd;
+wasm_rt_table_t* Z_spectestZ_table = &spectest_table;
+wasm_rt_memory_t* Z_spectestZ_memory = &spectest_memory;
+uint32_t* Z_spectestZ_globalZ_i = &spectest_global;
+
 static void init_spectest_module(void) {
-  wasm_rt_allocate_memory(&Z_spectestZ_memory, 1, 2);
-  wasm_rt_allocate_table(&Z_spectestZ_table, 10, 20);
+  wasm_rt_allocate_memory(&spectest_memory, 1, 2);
+  wasm_rt_allocate_table(&spectest_table, 10, 20);
 }
+
 
 int main(int argc, char** argv) {
   init_spectest_module();
